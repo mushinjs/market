@@ -1,0 +1,72 @@
+name: Build and publish the market
+
+# Every 30 minutes (and on pushes to main, and by hand): builds the plugin index from npm and publishes it to GitHub
+# Pages, where dashboards read https://mushinjs.github.io/market/index.json.
+#
+# GitHub Pages takes one artifact per deploy, so the market site and the index go out together: when the root has a
+# package.json with a build script, the site is built into dist/ first, and index.json is put at the root of what is
+# published. Without a site, only the index is published.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Test the indexer
+        run: npm test --prefix indexer
+
+      - name: Build the site
+        run: |
+          mkdir -p _site
+          if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.build ? 0 : 1)"; then
+            npm ci
+            npm run build
+            cp -r dist/. _site/
+          else
+            echo "No site to build (no build script in package.json); publishing the index alone."
+          fi
+
+      - name: Build the index
+        run: node indexer/scripts/build-index.mjs _site/index.json
+
+      - name: Refuse an empty index
+        run: |
+          count=$(node -p "require('./_site/index.json').packages.length")
+          if [ "$count" -eq 0 ]; then
+            echo "The registry returned no packages; keeping the index already published." >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

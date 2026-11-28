@@ -1,6 +1,6 @@
 // Builds the Mushin.js plugin market index from the npm registry.
 //
-//   node scripts/build-index.mjs [out=public/index.json]
+//   node indexer/scripts/build-index.mjs [out]   (default: indexer/out/index.json; a given path is from the current folder)
 //
 // Every package with the `mushin-plugin` keyword whose latest version has a `mushin` manifest is listed, unless it
 // is deprecated or on blocked.json. curated.json marks the picked ones. The format is in format.d.ts.
@@ -150,7 +150,7 @@ export async function buildIndex(registry = process.env.REGISTRY ?? 'https://reg
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const out = resolve(root, process.argv[2] ?? 'public/index.json')
+  const out = process.argv[2] ? resolve(process.argv[2]) : join(root, 'out', 'index.json')
   const index = await buildIndex()
   await mkdir(dirname(out), { recursive: true })
   await writeFile(out, JSON.stringify(index) + '\n')

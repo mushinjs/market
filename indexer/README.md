@@ -1,7 +1,8 @@
-# Mushin.js plugin market
+# The market index
 
-The index of plugins that the Mushin.js dashboard shows on **Plugins → Market**. It is built from the npm registry every
-30 minutes and published to GitHub Pages:
+The index of plugins that the Mushin.js dashboard shows on **Plugins → Market**. This folder builds it from the npm
+registry; the workflow in `.github/workflows/index.yml` runs it every 30 minutes and publishes it to GitHub Pages, next
+to the market site:
 
 ```
 https://mushinjs.github.io/market/index.json
@@ -39,9 +40,9 @@ It shows up within half an hour. There is nothing to submit here.
 
 ## Picked and blocked plugins
 
-- `curated.json` lists **picked** plugins: they get a badge, and dashboards with "only picked plugins can be installed"
+- `indexer/curated.json` lists **picked** plugins: they get a badge, and dashboards with "only picked plugins can be installed"
   turned on can install only these and the official ones.
-- `blocked.json` lists packages never shown, such as malicious ones or ones with an unfixed security problem.
+- `indexer/blocked.json` lists packages never shown, such as malicious ones or ones with an unfixed security problem.
 
 Changes to either come by pull request. For **picked**, say what the plugin does and link its repository; a maintainer
 installs it in a test app, reads its code for anything it does beyond what it says (network calls, file access,
@@ -57,8 +58,9 @@ dashboards cannot read.
 ## Running it
 
 ```sh
+cd indexer
 npm test
-npm run build            # writes public/index.json from registry.npmjs.org
+npm run build            # writes out/index.json from registry.npmjs.org
 REGISTRY=http://127.0.0.1:4873/ npm run build   # from another registry, such as a test one
 ```
 

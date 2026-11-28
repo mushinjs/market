@@ -1,9 +1,11 @@
 {
-  "name": "mushinjs-market",
+  "name": "mushinjs-market-indexer",
   "private": true,
   "type": "module",
   "description": "The Mushin.js plugin market index, built from the npm registry",
-  "engines": { "node": ">=22.13" },
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "build": "node scripts/build-index.mjs",
     "test": "node --test test/*.test.mjs"
