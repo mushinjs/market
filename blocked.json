@@ -1,0 +1,4 @@
+{
+  "$comment": "Packages never listed in the market, such as ones that are malicious, broken for everyone or abandoned with a security problem. Say why in the pull request.",
+  "packages": []
+}
